@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  mobile      String
+  email       String?
+  admissionNo String?  // Added
+  year        String?  // Added
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+
+  @@index([mobile])
+  @@index([admissionNo])
+}
+
+model Order {
+  id                      String   @id @default(cuid())
+  merchantTransactionId   String   @unique
+  customerId              String
+  customer                Customer @relation(fields: [customerId], references: [id])
+  
+  // Product details
+  productName             String
+  amount                  Int      // Amount in paise
+  
+  // T-shirt specific fields
+  nameOnTshirt            String?  // NEW: Name to print on t-shirt
+  size                    String?  // Size selected
+  isCommitteeMember       Boolean  @default(false) // NEW
+  committee               String?  // NEW: Committee name if member
+  
+  // Payment details
+  paymentStatus           String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  paymentMethod           String?  // UPI, CARD, NETBANKING, etc.
+  phonepeTransactionId    String?  // PhonePe's transaction ID
+  
+  // Metadata
+  paymentUrl              String?
+  redirectUrl             String?
+  
+  // Timestamps
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  paidAt                  DateTime?
+  
+  @@index([merchantTransactionId])
+  @@index([customerId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
