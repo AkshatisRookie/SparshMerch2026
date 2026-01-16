@@ -17,9 +17,13 @@ const SALT_INDEX = 1;
 
 // CORS - Allow your frontend
 app.use(cors({
-  origin: [FRONTEND_URL, 'http://localhost:3000'],
+  origin: [
+    "http://localhost:3000",
+    "https://sparsh-merch2026.vercel.app"
+  ],
   credentials: true
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
