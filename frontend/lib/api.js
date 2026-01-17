@@ -1,12 +1,18 @@
 // lib/api.js
 
 // Use environment variable for API URL, fallback for development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// In production, this should be set to your backend URL (e.g., https://sparsh-backend.onrender.com)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (typeof window !== 'undefined' 
+    ? 'http://localhost:5000' // Client-side fallback
+    : 'http://localhost:5000' // Server-side fallback
+  );
 
-// DEBUG: Check what URL is being used (only in development)
-if (process.env.NODE_ENV === 'development') {
+// DEBUG: Log API URL in both development and production for debugging
+if (typeof window !== 'undefined') {
   console.log('🔍 API_BASE_URL:', API_BASE_URL);
   console.log('🔍 ENV Variable:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('🔍 Current Origin:', window.location.origin);
 }
 
 export async function createPayment(orderData) {
@@ -65,11 +71,25 @@ export async function createPayment(orderData) {
   } catch (error) {
     console.error('=== Network or Fetch Error ===');
     console.error('Error:', error);
+    console.error('API URL attempted:', `${API_BASE_URL}/api/payment/create-link`);
+    
+    // Provide more helpful error messages
+    let errorMessage = error.message || 'Network error occurred';
+    
+    // Check if it's a CORS or connection error
+    if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
+      if (API_BASE_URL.includes('localhost')) {
+        errorMessage = 'Cannot connect to backend server. Make sure:\n1. Backend server is running\n2. NEXT_PUBLIC_API_URL environment variable is set in production';
+      } else {
+        errorMessage = `Cannot connect to backend at ${API_BASE_URL}. Please check:\n1. Backend server is running and accessible\n2. CORS is properly configured\n3. Network connection is stable`;
+      }
+    }
     
     return {
       success: false,
-      error: error.message || 'Network error occurred',
-      networkError: true
+      error: errorMessage,
+      networkError: true,
+      apiUrl: API_BASE_URL
     };
   }
 }
