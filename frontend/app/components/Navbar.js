@@ -219,7 +219,7 @@ export const Navbar = ({
       </header>
 
       {/* ==================== MOBILE BOTTOM TAB BAR ==================== */}
-      <nav className="fixed bottom-0left-0 right-0 z-50 md:hidden safe-area-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-bottom">
         <div 
           className="relative backdrop-blur-xl"
           style={{
