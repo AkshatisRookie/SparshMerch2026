@@ -18,7 +18,7 @@ const SALT_INDEX = 1;
 // CORS - Allow your frontend
 app.use(cors({
   origin: [
-    "http://localhost:3000",
+    "https://sparsh-backend.onrender.com/api/payment/create-link",
     "https://sparsh-merch2026.vercel.app"
   ],
   credentials: true
