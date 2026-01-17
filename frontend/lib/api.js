@@ -2,17 +2,40 @@
 
 // Use environment variable for API URL, fallback for development
 // In production, this should be set to your backend URL (e.g., https://sparsh-backend.onrender.com)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
-  (typeof window !== 'undefined' 
-    ? 'http://localhost:5000' // Client-side fallback
-    : 'http://localhost:5000' // Server-side fallback
-  );
+const getApiBaseUrl = () => {
+  // First priority: Environment variable
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Second priority: Detect if we're in production (Vercel)
+  if (typeof window !== 'undefined') {
+    const isProduction = window.location.hostname.includes('vercel.app') || 
+                         window.location.hostname !== 'localhost';
+    
+    if (isProduction) {
+      // In production, default to the expected backend URL
+      return 'https://sparsh-backend.onrender.com';
+    }
+  }
+  
+  // Development fallback
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // DEBUG: Log API URL in both development and production for debugging
 if (typeof window !== 'undefined') {
   console.log('🔍 API_BASE_URL:', API_BASE_URL);
-  console.log('🔍 ENV Variable:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('🔍 ENV Variable (NEXT_PUBLIC_API_URL):', process.env.NEXT_PUBLIC_API_URL || 'NOT SET');
   console.log('🔍 Current Origin:', window.location.origin);
+  
+  // Warn if using localhost in production
+  if (API_BASE_URL.includes('localhost') && !window.location.hostname.includes('localhost')) {
+    console.error('⚠️ WARNING: Using localhost API URL in production!');
+    console.error('⚠️ Please set NEXT_PUBLIC_API_URL environment variable in Vercel to: https://sparsh-backend.onrender.com');
+  }
 }
 
 export async function createPayment(orderData) {
