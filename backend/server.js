@@ -131,7 +131,7 @@ app.post('/api/payment/create-link', async (req, res) => {
         productName: PRODUCT_NAME,
         amount: finalAmount,
         paymentStatus: 'PENDING',
-        redirectUrl: `${FRONTEND_URL}/payment-redirect?txnId=${merchantTransactionId}`,
+        redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
         nameOnTshirt: nameOnTshirt || null,
         size: size || null,
         isCommitteeMember: isCommitteeMember || false,
@@ -154,7 +154,7 @@ app.post('/api/payment/create-link', async (req, res) => {
       merchantTransactionId: merchantTransactionId,
       merchantUserId: merchantUserId,
       amount: finalAmount,
-      redirectUrl: `${FRONTEND_URL}/payment-redirect?txnId=${merchantTransactionId}`,
+      redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
       redirectMode: 'GET',
       mobileNumber: mobileNumber,
       paymentInstrument: {
