@@ -1,7 +1,7 @@
 // lib/api.js
 
 // TEMPORARY: Hardcoded for testing
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'https://sparsh-backend.onrender.com';
 
 // DEBUG: Check what URL is being used
 console.log('🔍 API_BASE_URL:', API_BASE_URL);
