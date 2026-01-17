@@ -3,15 +3,17 @@
 // Use environment variable for API URL, fallback for development
 // In production, this should be set to your backend URL (e.g., https://sparsh-backend.onrender.com)
 const getApiBaseUrl = () => {
-  // First priority: Environment variable
+  // First priority: Environment variable (available at build time)
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   
-  // Second priority: Detect if we're in production (Vercel)
+  // Second priority: Detect if we're in production (client-side only)
   if (typeof window !== 'undefined') {
-    const isProduction = window.location.hostname.includes('vercel.app') || 
-                         window.location.hostname !== 'localhost';
+    const hostname = window.location.hostname;
+    const isProduction = hostname.includes('vercel.app') || 
+                         hostname.includes('onrender.com') ||
+                         (hostname !== 'localhost' && !hostname.includes('127.0.0.1'));
     
     if (isProduction) {
       // In production, default to the expected backend URL
@@ -19,11 +21,14 @@ const getApiBaseUrl = () => {
     }
   }
   
-  // Development fallback
+  // Development fallback (only used when running locally)
   return 'http://localhost:5000';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+// Get API URL dynamically (client-side) or use env var (server-side)
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? getApiBaseUrl()  // Client-side: can check window.location
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://sparsh-backend.onrender.com'); // Server-side: use env or production default
 
 // DEBUG: Log API URL in both development and production for debugging
 if (typeof window !== 'undefined') {
