@@ -9,21 +9,37 @@ const prisma = new PrismaClient();
 
 // Environment variables
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://sparsh-merch2026.vercel.app';
 const PHONEPE_HOST = process.env.PHONEPE_HOST || 'https://api-preprod.phonepe.com/apis/pg-sandbox';
 const MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID || 'PGTESTPAYUAT86';
 const SALT_KEY = process.env.PHONEPE_SALT_KEY || '96434309-7796-489d-8924-ab56988a6076';
 const SALT_INDEX = 1;
 
-// CORS - Allow your frontend
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://sparsh-merch2026.vercel.app",
+  "https://sparsh-backend.onrender.com"
+];
+
 app.use(cors({
-  origin: [
-    "https://sparsh-backend.onrender.com/api/payment/create-link",
-    "https://sparsh-merch2026.vercel.app"
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -113,7 +129,7 @@ app.post('/api/payment/create-link', async (req, res) => {
     }
 
     // Calculate final price
-    const finalAmount = isCommitteeMember*100 ? COMMITTEE_PRICE*100 : NON_COMMITTEE_PRICE*100;
+    const finalAmount = (isCommitteeMember ? COMMITTEE_PRICE : NON_COMMITTEE_PRICE) * 100;
 
     // Generate unique transaction ID
     const merchantTransactionId = generateTransactionId();
@@ -127,7 +143,7 @@ app.post('/api/payment/create-link', async (req, res) => {
         productName: PRODUCT_NAME,
         amount: finalAmount,
         paymentStatus: 'PENDING',
-        redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
+        redirectUrl: `${FRONTEND_URL}/payment-redirect?txnId=${merchantTransactionId}`,
         nameOnTshirt: nameOnTshirt || null,
         size: size || null,
         isCommitteeMember: isCommitteeMember || false,
@@ -150,7 +166,7 @@ app.post('/api/payment/create-link', async (req, res) => {
       merchantTransactionId: merchantTransactionId,
       merchantUserId: merchantUserId,
       amount: finalAmount,
-      redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
+      redirectUrl: `${FRONTEND_URL}/payment-redirect?txnId=${merchantTransactionId}`,
       redirectMode: 'GET',
       mobileNumber: mobileNumber,
       paymentInstrument: {
