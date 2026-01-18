@@ -7,7 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const app = express();
 const prisma = new PrismaClient();
 
-// Environment variables
+// 1. Environment variables FIRST
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://sparsh-merch2026.vercel.app';
 const PHONEPE_HOST = process.env.PHONEPE_HOST || 'https://api-preprod.phonepe.com/apis/pg-sandbox';
@@ -15,54 +15,54 @@ const MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID || 'PGTESTPAYUAT86';
 const SALT_KEY = process.env.PHONEPE_SALT_KEY || '96434309-7796-489d-8924-ab56988a6076';
 const SALT_INDEX = 1;
 
+// 2. Product config
+const PRODUCT_NAME = 'Sparsh Merch';
+const NON_COMMITTEE_PRICE = 309;
+const COMMITTEE_PRICE = 279;
+
+// 3. CORS Configuration
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
   "https://sparsh-merch2026.vercel.app",
-  "https://sparsh-backend.onrender.com"
+  "https://sparshmerch2026.onrender.com"
 ];
 
-
-// CORS Configuration - UPDATED
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, curl)
     if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://sparsh-merch2026.vercel.app",
-      "https://sparsh-backend.onrender.com"
-    ];
-    
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('❌ CORS blocked origin:', origin);
-      callback(null, true); // Still allow but log it
+      console.log('⚠️ Unknown origin:', origin);
+      callback(null, true); // Allow anyway
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-VERIFY'],
-  exposedHeaders: ['Content-Length', 'X-Request-Id'],
-  maxAge: 86400 // 24 hours
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
 }));
 
-// Handle preflight requests
+// 4. Handle preflight
 app.options('*', cors());
 
-// Add logging middleware
+// 5. Body parsers - MUST BE HERE
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 6. Logging
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path} from ${req.get('origin') || 'no-origin'}`);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} from ${req.get('origin') || 'no-origin'}`);
   next();
 });
+
+// 7. Test database connection
+prisma.$connect()
+  .then(() => console.log('✅ Database connected'))
+  .catch((err) => console.error('❌ Database connection failed:', err));
+
 // ... rest of your code
 
-// At the top, add pricing config
-const PRODUCT_NAME = 'Sparsh Merch';
-const NON_COMMITTEE_PRICE = 309;
-const COMMITTEE_PRICE = 279;
 
 // Helper function to generate checksum
 function generateChecksum(payload, endpoint) {
