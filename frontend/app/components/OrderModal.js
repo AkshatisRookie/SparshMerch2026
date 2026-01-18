@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPayment } from '@/lib/api'; 
+// Temporarily change in OrderModal.js
+const API_BASE_URL = 'https://sparshmerch2026.onrender.com';
 
 const OrderModal = ({ isOpen, onClose, selectedSize, tshirt }) => {
   const [formData, setFormData] = useState({

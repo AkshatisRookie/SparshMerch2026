@@ -1,4 +1,4 @@
-// lib/api.js
+// Temporarily change in OrderModal.js
 
 // Use environment variable for API URL, fallback for development
 // In production, this should be set to your backend URL (e.g., https://sparsh-backend.onrender.com)
@@ -17,7 +17,7 @@ const getApiBaseUrl = () => {
     
     if (isProduction) {
       // In production, default to the expected backend URL
-      return 'https://sparsh-backend.onrender.com';
+      return 'https://sparshmerch2026.onrender.com';
     }
   }
   
@@ -28,7 +28,7 @@ const getApiBaseUrl = () => {
 // Get API URL dynamically (client-side) or use env var (server-side)
 const API_BASE_URL = typeof window !== 'undefined' 
   ? getApiBaseUrl()  // Client-side: can check window.location
-  : (process.env.NEXT_PUBLIC_API_URL || 'https://sparsh-backend.onrender.com'); // Server-side: use env or production default
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://sparshmerch2026.onrender.com'); // Server-side: use env or production default
 
 // DEBUG: Log API URL in both development and production for debugging
 if (typeof window !== 'undefined') {
@@ -39,7 +39,7 @@ if (typeof window !== 'undefined') {
   // Warn if using localhost in production
   if (API_BASE_URL.includes('localhost') && !window.location.hostname.includes('localhost')) {
     console.error('⚠️ WARNING: Using localhost API URL in production!');
-    console.error('⚠️ Please set NEXT_PUBLIC_API_URL environment variable in Vercel to: https://sparsh-backend.onrender.com');
+    console.error('⚠️ Please set NEXT_PUBLIC_API_URL environment variable in Vercel to: https://sparshmerch2026.onrender.com');
   }
 }
 

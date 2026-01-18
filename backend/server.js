@@ -50,6 +50,8 @@ app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 // 6. Logging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} from ${req.get('origin') || 'no-origin'}`);
@@ -149,6 +151,9 @@ app.post('/api/payment/create-link', async (req, res) => {
     const merchantUserId = 'MUID' + customer.id;
 
     // Create order in database FIRST
+    // Use the API callback endpoint that handles POST requests from PhonePe
+    const callbackUrl = `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`;
+    
     const order = await prisma.order.create({
       data: {
         merchantTransactionId: merchantTransactionId,
@@ -156,7 +161,7 @@ app.post('/api/payment/create-link', async (req, res) => {
         productName: PRODUCT_NAME,
         amount: finalAmount,
         paymentStatus: 'PENDING',
-        redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
+        redirectUrl: callbackUrl,
         nameOnTshirt: nameOnTshirt || null,
         size: size || null,
         isCommitteeMember: isCommitteeMember || false,
@@ -174,13 +179,14 @@ app.post('/api/payment/create-link', async (req, res) => {
     });
 
     // Prepare PhonePe payment payload
+    // Use POST redirect mode since PhonePe sends POST callbacks with payment data
     const payload = {
       merchantId: MERCHANT_ID,
       merchantTransactionId: merchantTransactionId,
       merchantUserId: merchantUserId,
       amount: finalAmount,
-      redirectUrl: `${FRONTEND_URL}/payment-success?txnId=${merchantTransactionId}`,
-      redirectMode: 'GET',
+      redirectUrl: callbackUrl,
+      redirectMode: 'POST',
       mobileNumber: mobileNumber,
       paymentInstrument: {
         type: 'PAY_PAGE'
